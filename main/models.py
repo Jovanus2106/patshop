@@ -1,6 +1,15 @@
 from django.db import models
 
 class Product(models.Model):
+
+    CATEGORY_CHOICES = [
+    ('ELECTRONICS', 'Elektronik'),
+    ('FASHION', 'Fashion'),
+    ('HOME', 'Peralatan Rumah'),
+    ('FOOD', 'Makanan & Minuman'),
+    ('SPORTS', 'Olahraga')]
+
+
     name = models.CharField(max_length=100)
     price = models.IntegerField()
     description = models.TextField()
