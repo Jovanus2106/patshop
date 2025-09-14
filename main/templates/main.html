@@ -4,3 +4,18 @@
 <p>{{ Nama }}<p>
 <h5>Kelas: </h5>
 <p>{{ Kelas }}</p>
+
+<h1>Daftar Produk</h1>
+<a href="{% url 'main:add_product' %}">Tambah Produk</a>
+<ul>
+    {% for toko in products %}
+        <li>
+            <img src="{{ toko.thumbnail }}" width="100">
+            <strong>{{ toko.name }}</strong> - Rp{{ toko.price }}
+            ({{ toko.category }}) | Stok: {{ toko.stock }}
+            <a href="{% url 'main:detail_product' toko.id %}">Detail</a>
+        </li>
+    {% endfor %}
+</ul>
+
+

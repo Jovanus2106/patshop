@@ -1,0 +1,8 @@
+<h1>Detail Produk</h1>
+<img src="{{ toko.thumbnail }}" width="200">
+<p><strong>Nama:</strong> {{ toko.name }}</p>
+<p><strong>Harga:</strong> Rp{{ toko.price }}</p>
+<p><strong>Deskripsi:</strong> {{ toko.description }}</p>
+<p><strong>Kategori:</strong> {{ toko.category }}</p>
+<p><strong>Stok:</strong> {{ toko.stock }}</p>
+<a href="{% url 'main:show_main' %}">Kembali</a>

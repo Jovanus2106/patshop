@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-htj&llmrg9ryv+k!w8!mf&#x!noj1^570f7akskpkv!==0n9j-
 DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "jovanus-irwan-patshop.pbp.cs.ui.ac.id"]
-
+CSRF_TRUSTED_ORIGINS = ["https://jovanus-irwan-footballnews.pbp.cs.ui.ac.id"]
 
 # Application definition
 
@@ -52,12 +52,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'PAT.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
+        'DIRS': [BASE_DIR / 'templates'], # Tambahkan konten baris ini
+
+        'APP_DIRS': True, #harus true
+        'OPTIONS': { 
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
