@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-htj&llmrg9ryv+k!w8!mf&#x!noj1^570f7akskpkv!==0n9j-
 DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "jovanus-irwan-patshop.pbp.cs.ui.ac.id"]
-CSRF_TRUSTED_ORIGINS = ["https://jovanus-irwan-footballnews.pbp.cs.ui.ac.id"]
+CSRF_TRUSTED_ORIGINS = ["https://jovanus-irwan-patshop.pbp.cs.ui.ac.id"]
 
 # Application definition
 
