@@ -1,3 +1,48 @@
+1.  Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
+
+Menurut saya data delivery dibutuhkan dalam pengimplementasian sebuah platform karena mempunyai beberapa tujuan utama yaitu: 
+- Memisahkan back end dan front end. Hal ini sangat berguna karena backend berfokus untuk bertanggung jawab serta menyediakan data, sedangkan front end bertugas menampilkan dan memudahkan pengembangan paralel dan manintenance
+- Skalabilitas dan performa. API sangat memungkinkan caching, pagination dan juga optimasi transfer sehingga aplikasi akan lebih cepat dan hemat sumber daya. 
+- Pengalaman pengguna. Data yang diberikan dan digunakan sebagai API dapat membuat antarmuka menjadi lebih responsif serta mendukung fitur realtime atau offline. 
+- Keamanan. Keamanan bisa menjadi lebih terjamin dikarenakan terdapat endpoint terpisah sehingga kita bisa mengatur otorisasi, versioning API, dan pembatasan akses yang lebih mudah 
+
+2.Menurutmu, mana yang lebih baik antara  XML atau JSON ? Mengapa Json lebih populer dibandingkan XML? 
+
+Menurut saya keduanya cukup sama dan mempunyai peran yang cukup berbeda. JSON mungkin lebih poopuler untuk API web modernkarena ringan (payload kecil), terdapat Native untuk JavaScript, mudah dibaca/ditulis dan cocok untuk REST/HTTP/SPA. XML juga menurut saya masih tetap berguna karena ketika butuh beberapa fitur lanjutan seperti namespaces, XSD (untuk skema dan validasi dokumen) atau transformasi XLT (dokumen kompleks) maka sangat dibutuhkan XML. 
+
+3. Jelaskan fungsi dari method is_valid() pada form Django dan mengapa kita membutuhkan method tersebut?
+
+Method ini menjalankan proses validasi form dengan memanggil validasi tiap field, menjalankan clean_<field>() dan clean() pada form, serta mengisi form.cleaned_data. Method ini sangat penting karena dapat memastikan data yang masuk sesuai aturan (seperti tipe data, panjang maksimal dan pilihan yang sudah disediakan). Selain itu juga berguna untuk menghindari error saat menyimpan ke data base (string ke integerfield) dan juga mencegah data berbahaya karena validator dapat menolak jika input berbeda dengan yang diharapkan. 
+
+4. Mengapa kita membutuhkan csrf_token saat membuat form di Django? Apa yang dapat terjadi jika kita tidak menambahkan csrf_token pada form Django? Bagaimana hal tersebut dapat dimanfaatkan oleh penyerang?
+
+CSRF token sangat penting karena digunakan untuk mencegah serangan Cross-Site Request Forgery yaitu teknik yang dimana penyerang memanfaatkan sesi login para korban untuk melakukan aksi yang tidak sah. Jadi untuk cara kerjanya nanti Django akan mengeluarkan token dan meminta token itu untuk disertakan juga dalam form POST. Server nanti akan berusaha memverifikasi token setiap request yang mengubah state. 
+
+Jadi hal tersebut dapat dimanfaatkan oleh penyerang pada saat penyerang buat halaman A yang berisi form POST otomatis ke misal BCA.com/transfer. Jika korban sudah login ke BCA.com maka nanti websitenya tidak memverifikasi tokennya sehingga nanti aksi pembobolan transfer bisa berhasil. Jadi jangan lupa untuk selalu sertakan {% csrf_token %} di form template dan gunakan header X-CSRFToken untuk AJAX. Django default  akan menolak request tanpa token, yang sebenarnya berguna untuk melindungi aplikasi.
+
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+
+Saya akan menjelaskan pertama dari mulai membuat Toko (di main/models.py) dimana nanti di dalam models.py akan diisi berupa atribut untuk toko tersebut (buat atribut data basenya ). Disini saya ada memberikan name (CharField(100)), price (IntegerField), description (TextField), thumbnail (URLField), category (CharField dengan CATEGORY_CHOICES), stock (IntegerField), is_featured (BooleanField default False). Untuk Category-choices saya ada melakukan pembatasan dengan hanya menyediakan pilihan electronics, fashion, home, food, sports. 
+
+Setelah membuat models.py maka kemudian saya akan lanjut dengan membuat file baru di main yaitu forms.py yang berfungsi untuk add_product disana dan nanti produk yang sudah ditambahkan akan muncul di main. Di dalam forms.py saya ada mengisi dengan classTokoForm(ModelForm): Meta: model= Toko; fields= ["name","price","description","thumbnail","category","stock","is_featured"]. Kemudian saya melakukan beberapa perubahan di views.py dengan di show_mainnya ada saya tambahin Toko.objects.all() untuk bisa menunjukkan semua produknya. 
+
+Selain itu saya ada tambahkan juga method add_product dan detail_produk di views.py agar nanti fungsi add_product dan detail_product tersebut bisa dijalankan pada saat di websitenya. Jangan lupa juga ada saya menambahkan untuk API end points dengan show_json, show_xml, show_json_by_id , show_xml_by_id dengan menggunakan django.core.serializers.serialize. Hal ini saya lakukan untuk memisahkan concerns agar views mengatur alur dan validasi sedangkan serializers untuk menangani data delivery untuk API
+
+Setelah itu jangan lupa juga untuk mendefinisikan URLS di  main dan ke urls.py. Disana harus ada ditambahkan beberapa yaitu path('add/', add_product, name='add_product'), path('detail/<str:id>/', detail_product, name='detail_product'), plus API paths. API paths itu untuk yang XML dan JSON. 
+
+
+Kemudian yang terakhir saya kembali ke template dan melengkapi bagian main.html dengan menambahkan for untuk bisa mengeluarkan list produk saya. Selain itu, saya juga menambahkan add_product.html agar saya bisa menambahkan produk dan juga bisa mengisi beberapa detail dari produk tersebut. Setelah saya membuat add_product, saya juga nanti akan mengembalikannya ke show_main untuk menampilkan skeilas mengenai produk tersebut dan saya juga menambahkan detail_produk agar saya bisa melihat tentang apa yang sudah saya tambahkan mengenai informasi produk tersebut. Untuk detail produk saya menambahkan juga product.nama, product.stock agar saat detail produk diakses maka bisa nanti mengeluarkan informasi seputar produk tersebut dan saya juga menggunakan for loop agar bisa menampilkan produk tersebut (for loop di main). Setelah itu saya juga membuat base.html untuk template dasar yang digunakan kerangka halaman web lainnya dalam projek. Untuk yang terakhirnya jangan lupa untuk mengecek juga di post man dengan http://localhost:8000/xml/ dan juga http://localhost:8000/json/ serta http://localhost:8000/xml/[produk.id] dan http://localhost:8000/json[produk.id]. hal ini berguna untuk mengecek apakah xml,json serta xml dan json dalam produk.id apakah sudah terlihat di dalam post man atau tidak. Postman semacam aplikasi yang membantu mempermudah untuk membuka xml dan json (menurut saya) 
+
+6.  Apakah ada feedback untuk asdos di tutorial 2 yang sudah kalian kerjakan?
+
+Menurut saya untuk asdos di tutorial 2 sudah baik dan sudah sesuai dengan kriteria sehingga saya untuk mengerjakannya tidak terllau susah dan mudah cukup mengerti. Saya juga mempelajari dari penjelasan yang diberikan serta saya mencoba mengingat dan mencatatnya. Terima kasih untuk kakak asdos telah membuat tutorial tidak terllau susah. 
+
+Link untuk mengakses xml dan json:  https://docs.google.com/document/d/1cPnFUHBDGMFpsxMlgOQaGtbgYODdwTLNGGrRijRWZjw/edit?usp=sharing
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 1. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
 Jawaban : Langkah pertama yang saya lakukan adalah membuat folder bernama PAT. Setelah itu, saya mengecek Django menggunakan terminal dengan perintah pip install django. Django saya sudah ada dan ternyata berada di versi 24.2 dan langsung diugprade secara otomatis ke versi 25.2 karena dari perintah pip install django. Kemudian, saya membuat proyek Django dengan menjalankan python -m django startproject PAT. Perlu dicatat, jika perintah ini dijalankan dari folder induk, maka Django akan membuat direktori PAT/ yang berisi manage.py serta subdirektori konfigurasi dengan nama yang sama. Namun, jika saya sudah berada di dalam folder kosong PAT, sebaiknya menggunakan python -m django startproject PAT . agar tidak terjadi struktur ganda PAT/PAT.
 

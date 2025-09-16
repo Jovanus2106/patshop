@@ -1,21 +1,29 @@
 <h5>Aplikasi: </h5>
 <p>{{ NamaAplikasi }}</p>
 <h5>Nama: </h5>
-<p>{{ Nama }}<p>
+<p>{{ Nama }}</p>
 <h5>Kelas: </h5>
 <p>{{ Kelas }}</p>
 
 <h1>Daftar Produk</h1>
-<a href="{% url 'main:add_product' %}">Tambah Produk</a>
+
+<a href="{% url 'main:add_product' %}">
+    <button type="button">Tambah Produk</button>
+</a>
+
 <ul>
-    {% for toko in products %}
+    {% for product in products %}
         <li>
-            <img src="{{ toko.thumbnail }}" width="100">
-            <strong>{{ toko.name }}</strong> - Rp{{ toko.price }}
-            ({{ toko.category }}) | Stok: {{ toko.stock }}
-            <a href="{% url 'main:detail_product' toko.id %}">Detail</a>
+            <img src="{{ product.thumbnail }}" width="100">
+            <strong>{{ product.name }}</strong> - Rp{{ product.price }}
+            ({{ product.category }}) | Stok: {{ product.stock }} |
+
+            {% if product.is_featured %}
+                <b>Featured</b>
+            {% endif %}
+
+            <a href="{% url 'main:detail_product' product.id %}">Detail</a>
         </li>
     {% endfor %}
 </ul>
-
 
