@@ -1,5 +1,7 @@
 from django.db import models
 import  uuid
+from django.contrib.auth.models import User
+
 class Toko(models.Model):
 
     CATEGORY_CHOICES = [
@@ -17,7 +19,8 @@ class Toko(models.Model):
     category = models.CharField(max_length=20,choices=CATEGORY_CHOICES)
     stock = models.IntegerField()
     is_featured = models.BooleanField(default=False)
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    
 
     def __str__(self):
         return self.name
