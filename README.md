@@ -1,3 +1,56 @@
+1. Apa itu Django AuthenticationForm? Jelaskan juga kelebihan dan kekurangannya.
+
+Django AuthenticationForm adalah form bawaan Django yang sering dipakai untuk menangani login pengguna. Form ini  otomatis akan menyediakan field username dan password serta melakukan validasi apakah user dan password yang dimasukkan cocok dengan yang ada di database. Kelebihannya, developer tidak perlu membuat form login dari nol karena Django sudah menyiapkan validasi keamanan yang cukup kuat. Dengan kelebihan ini membuat django authentication form sering dikenal praktis, depat dipakai dan juga aman.
+
+Kekurangannya, form ini cukup standar sehingga jika kita ingin menambahkan fitur khusus seperti login dengan email atau autentifikasi melalui faktor yang lain, maka kita harus melakukan penambahan atau custom sendiri.
+
+2. Apa perbedaan antara autentikasi dan otorisasi? Bagaiamana Django mengimplementasikan kedua konsep tersebut?
+
+Menurut saya, Autentikasi adalah proses memverifikasi identitas pengguna, misalnya dengan username dan password untuk memastikan bahwa dia adalah orang yang telah memasukkan pasword dan username sesuai yang dia miliki. Sementara otorisasi adalah proses menentukan apa saja yang boleh dilakukan pengguna setelah berhasil login, misalnya dia hanya diperbolehkan hanya mengakses fitur belanja saja. Django mengimplementasikan autentikasi lewat sistem login/logout dan model User sedangkan otorisasi diatur lewat permission yang dapat menentukan hak akses pengguna terhadap resourcenya.
+
+3. Apa saja kelebihan dan kekurangan session dan cookies dalam konteks menyimpan state di aplikasi web?
+
+Session dan cookies merupakan kedua hal yang sering digunakan untuk menyimpan state dalam aplikasi web. Cookies itu seperti “catatan kecil” yang disimpan di browser client. Setiap kali client melakukan request ke server, cookies ini otomatis ikut dikirim. Jadi cookies lebih berperan dalam menginformasikan data dari sisi client ke server, sedangkan Session  sebenarnya  lebih ke disimpan di server, bukan di client. Jadi ketika user login, server bikin data session (misalnya id pengguna, status login, role, dsb.) dan disimpan di database atau memori server. Lalu server kasih ke browser sebuah cookie kecil berisi sessionid.
+
+Cookies memliliki kelebihan yaitu gampang diakses oleh client dan cocok untuk data ringan, namun untuk kekurangannya yaitu, gampang dimodifikasi user,kapasitas kecil, ada risiko keamanan kalau terlalu sensitif
+
+Session memiliki kelebihan yaitu lebih aman karena data aslinya ada di server dan bukan di browser. Namun untuk kekurangannya adalah server jadi lebih berat karena harus menyimpan banyak session user.
+
+4. Apakah penggunaan cookies aman secara default dalam pengembangan web, atau apakah ada risiko potensial yang harus diwaspadai? Bagaimana Django menangani hal tersebut?
+
+Tidak selalu aman karena ada beberapa resiko yang harus diwaspada. Ada beberapa risiko yang cukup sering diketahui yaitu: XSS dengan cara skrip jahat di halaman dan bisa baca cookie, CSRF akan terjadi dengan cara browser otomatis yang nantinya akan kirim cookie ke domain target, dan Man in the middle (MITM) akan terjadi jika koneksi tidak HTTPS sehingga cookie bisa disadap
+
+
+Django mengatasi / rekomendasi konfigurasi:
+
+- HttpOnly cookies
+SESSION_COOKIE_HTTPONLY = True (default: True), hal ini dilakukan untuk  mencegah JS baca cookie session.
+Tapi CSRF cookie tidak diset HttpOnly karena JS perlu baca token CSRF untuk AJAX. 
+
+-Secure flag
+SESSION_COOKIE_SECURE = True dan CSRF_COOKIE_SECURE = True , hal ini dilakukan untuk cookie hanya dikirim lewat HTTPS. Cara ini sangat disarankan di production
+
+-SameSite
+SESSION_COOKIE_SAMESITE dan CSRF_COOKIE_SAMESITE (opsi: 'Lax', 'Strict', atau 'None') . Hal ini dilakukan untuk membatasi kapan cookie dikirim untuk cross-site requests.
+Lax juga sering jadi kompromi bagus karena mengizinkan navigasi top-level GET tapi melindungi dari sebagian besar CSRF.
+
+-CSRF protection
+Django memiliki CsrfViewMiddleware default. Kita juga harus pakai {% csrf_token %} pada form POST dan mengirim X-CSRFToken untuk AJAX. Django menolak POST tanpa token valid karena untuk  mencegah CSRF.
+
+-Session management
+Regenerasi session id setelah login (django.contrib.auth.login sudah aman tapi pastikan sesi lama tidak reuseable), atur SESSION_EXPIRE_AT_BROWSER_CLOSE atau SESSION_COOKIE_AGE sesuai kebutuhan.Untuk aplikasi sensitif, set timeout pendek (seperti SCELE).
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+
+Saya memulai implementasi checklist ini dengan menambahkan fungsi registrasi, login, dan logout pada aplikasi. Pertama, saya membuat sebuah form registrasi dengan menambahkan UserCreationForm dari Django yang saya import  dan juga menaruh method register di views.py. Form ini saya hubungkan ke template HTML baru (yaitu register.html) agar user dapat melakukan pendaftaran akun baru. Selanjutnya, saya menambahkan method login_user di views.py untuk proses login ke dalam main aplikasi (proses login membutuhkan username dan password yang tepat), yang menggunakan AuthenticationForm dan fungsi authenticate dari Django. Jika pengguna berhasil login, maka sistem akan menyimpan session serta menambahkan cookie last_login untuk mencatat waktu terakhir kalau user masuk. Cookie last_login nanti akan ditampilkan di main aplikasi (client). Selain itu, saya juga membuat view logout_user yang bertugas menghapus session dan mengarahkan kembali pengguna ke halaman login. Semua view ini saya hubungkan melalui urls.py, dan saya memastikan untuk menambahkan link seperti login dan logout  pada template agar pengguna mudah mengakses fungsi login dan logout. Jangan lupa untuk menambahkan register dan login dalam bentuk html. Selain itu, saya juga ada menambahkan filter berupa my product dan all products agar bisa membedakan bahwa my product adalah produk yang telah ditambahkan oleh user login tersebut dan all products adalah semua produk yang ditambahkan oleh semua user dan ditampilkan dalam satu halaman.  Saya juga ada menambahkan di detail berupa "Ditambahkan oleh" agar bisa mengetahui produk ditambahkan oleh siapa.
+
+Setelah proses yang perlu ditambahin berupa login, registrasi dan logout sudah selesai. Maka saya mencoba langkah berikutnya yaitu untuk membuat 2 akun baru dengan masing masing menambahkan 3 produk di tiap akun. Jadi saya pertama akan melakukan register dulu sebanyak 2 kali dan saya juga membuat username dan password login untuk akun baru. Setelah melakukan register maka saya akan melakukan login dan mulai menambahkan produk sebanyak 3 kali. Produk yang sudah ditambahkan oleh user pertama maka akan ditampilkan di all products dan my product. Kemudian saya melakukan logout untuk user pertama dan kembali login lagi untuk user kedua. Saya melakukan cara yang sama dengan melakukan penambahan produk seperti tadi dan menambahkan 3 produk yang baru. Untuk di my Produk  akan hanya ditampilkan 3 produk yang ditambahkan oleh user kedua dan di all produk akan ditampilkan 6 produk yang sudah ditambahkan oleh user 1 dan user 2.
+
+Langkah berikutnya adalah menghubungkan model Product dengan model User. Hal ini saya lakukan dengan menambahkan ForeignKey ke model Product yang mengacu ke model User. Dengan begitu, setiap produk akan tercatat sebagai milik dari satu pengguna tertentu. Setelah itu, saya melakukan migrasi agar perubahan pada model tercatat ke dalam basis data. Hal ini bisa juga diliat dari detail.html saya dengan ada "Ditambahkan oleh" agar mengetahui produk tersebut ditambahkan oleh siapa.
+
+Kemudian, saya menambahkan fitur untuk menampilkan informasi pengguna yang sedang login pada halaman utama aplikasi. Informasi yang ditampilkan adalah username dari pengguna serta cookie last_login yang sebelumnya sudah disimpan saat proses login berhasil. Dengan cara ini, user bisa langsung mengetahui siapa yang sedang login dan kapan terakhir kali mereka masuk ke aplikasi.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 1.  Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
 
 Menurut saya data delivery dibutuhkan dalam pengimplementasian sebuah platform karena mempunyai beberapa tujuan utama yaitu: 
