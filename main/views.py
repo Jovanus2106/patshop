@@ -72,17 +72,6 @@ def detail_product(request, id):
     return render(request, "detail.html", {"product": product})
 
 # Tambah produk
-
-def add_product(request):
-    if request.method == "POST":
-        form = TokoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("main:show_main")
-    else:
-        form = TokoForm()
-    return render(request, "add_product.html", {"form": form})
-
 def add_product(request):
     form = TokoForm(request.POST or None)
 
