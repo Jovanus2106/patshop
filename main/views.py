@@ -28,15 +28,34 @@ def show_main(request):
         'Nama': request.user.username,
         'Kelas': 'PBP B',
         'products': products,
-        'last_login': request.COOKIES.get('last_login', 'Never')
+        'last_login': request.COOKIES.get('last_login', 'Never'),
+        'categories': Toko.CATEGORY_CHOICES 
     }
     return render(request, "main.html",context)
 
 def logout_user(request):
     logout(request)
-    response = HttpResponseRedirect(reverse('main:login'))
+    response = HttpResponseRedirect(reverse('main:login_user'))
     response.delete_cookie('last_login')
     return response
+
+def edit_produk(request, id):
+    produk = get_object_or_404(Toko, pk=id)
+    form = TokoForm(request.POST or None, instance=produk)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_main')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_produk.html", context)
+
+def delete_produk(request, id):
+    produk = get_object_or_404(Toko, pk=id)
+    produk.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
 
 def login_user(request):
    if request.method == 'POST':
@@ -62,7 +81,7 @@ def register(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Your account has been successfully created!')
-            return redirect('main:login')
+            return redirect('main:login_user')
     context = {'form':form}
     return render(request, 'register.html', context)
 

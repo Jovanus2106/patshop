@@ -1,0 +1,50 @@
+{% load static %}
+<article class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+  
+  <div class="aspect-square relative overflow-hidden bg-gray-100">
+    <a href="{% url 'main:detail_product' product.id %}" class="block w-full h-full">
+      {% if product.thumbnail %}
+        <img src="{{ product.thumbnail }}" alt="{{ product.name }}" class="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-[1.03]">
+      {% else %}
+        <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">No Image</div>
+      {% endif %}
+    </a>
+
+    <div class="absolute top-3 left-3 z-20">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-600 text-white shadow-md">
+        {{ product.get_category_display }}
+      </span>
+    </div>
+
+    <div class="absolute top-3 right-3 z-20 flex flex-col space-y-2">
+      {% if product.is_featured %}
+        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-400 text-yellow-900 shadow-md">
+          ⭐ Featured
+        </span>
+      {% endif %}
+      </div>
+  </div>
+
+  <div class="p-4 text-center">
+    <h3 class="text-base font-semibold text-gray-900 line-clamp-2 leading-tight mb-1">
+      <a href="{% url 'main:detail_product' product.id %}" class="hover:text-green-600 transition-colors">
+        {{ product.name }}
+      </a>
+    </h3>
+    <p class="text-sm font-bold text-green-600">
+        Rp {{ product.price|floatformat:0 }}
+    </p>
+    <p class="text-xs text-gray-500 mt-1">Stok: {{ product.stock }}</p>
+    
+    {% if user.is_authenticated and product.user == user %}
+      <div class="flex items-center justify-center pt-3 mt-3 border-t border-gray-100 space-x-4">
+        <a href="{% url 'main:edit_produk' product.id %}" class="text-gray-600 hover:text-green-700 text-sm transition-colors">
+          Edit
+        </a>
+        <a href="{% url 'main:delete_produk' product.id %}" class="text-red-600 hover:text-red-700 text-sm transition-colors">
+          Delete
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</article>

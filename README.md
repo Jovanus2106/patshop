@@ -1,3 +1,14 @@
+1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut! 
+
+Ketika sebuah elemen HTML dipengaruhi oleh banyak aturan CSS, maka browser akan menentukan 
+
+2. Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design, serta jelaskan mengapa! 
+
+3.Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut! 
+
+4.Jelaskan konsep flex box dan grid layout beserta kegunaannya!
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 1. Apa itu Django AuthenticationForm? Jelaskan juga kelebihan dan kekurangannya.
 
 Django AuthenticationForm adalah form bawaan Django yang sering dipakai untuk menangani login pengguna. Form ini  otomatis akan menyediakan field username dan password serta melakukan validasi apakah user dan password yang dimasukkan cocok dengan yang ada di database. Kelebihannya, developer tidak perlu membuat form login dari nol karena Django sudah menyiapkan validasi keamanan yang cukup kuat. Dengan kelebihan ini membuat django authentication form sering dikenal praktis, depat dipakai dan juga aman.

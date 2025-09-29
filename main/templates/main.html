@@ -1,39 +1,75 @@
-<h5>Aplikasi: </h5>
-<p>{{ NamaAplikasi }}</p>
-<h5>Nama: </h5>
-<p>{{ Nama }}</p>
-<h5>Kelas: </h5>
-<p>{{ Kelas }}</p>
+{% extends 'base.html' %}
+{% load static %}
 
-<h1>Daftar Produk</h1>
+{% block meta %}
+<title>PAT Shop</title>
+{% endblock meta %}
 
-<a href="{% url 'main:add_product' %}">
-    <button type="button">Tambah Produk</button>
-</a>
-<a href="{% url 'main:logout' %}">
-  <button>Logout</button>
-</a>
-<h5>Sesi terakhir login: {{ last_login }}</h5>
-<hr>
-<a href="?filter=all">
-    <button type="button">All Products</button>
-</a>
-<a href="?filter=my">
-    <button type="button">My Product</button>
-</a> 
-<ul>
-    {% for product in products %}
-        <li>
-            <img src="{{ product.thumbnail }}" width="100">
-            <strong>{{ product.name }}</strong> - Rp{{ product.price }}
-            ({{ product.category }}) | Stok: {{ product.stock }} |
+{% block content %}
+{% include 'navbar.html' %}
+<div class="bg-gray-50 w-full pt-20 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            {% if product.is_featured %}
-                <b>Featured</b>
-            {% endif %}
+    <!-- Header Section -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Selamat Datang di <span class="text-green-600">PAT Shop</span></h1>
+      <p class="text-gray-600">Temukan produk terbaik sesuai kebutuhanmu 🚀</p>
+    </div>
 
-            <a href="{% url 'main:detail_product' product.id %}">Detail</a>
-        </li>
-    {% endfor %}
-</ul>
+    <!-- Filter Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div class="flex space-x-3 mb-4 sm:mb-0">
+        <a href="?" class="{% if request.GET.filter == 'all' or not request.GET.filter  %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+          All Product
+        </a>
+        <a href="?filter=my" class="{% if request.GET.filter == 'my' %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+          My Product
+        </a>
+      </div>
+      {% if user.is_authenticated %}
+        <div class="text-sm text-gray-500">
+          Last login: {{ last_login }}
+        </div>
+      {% endif %}
+    </div>
 
+    <!-- Product Grid -->
+    {% if not products %}
+      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
+        <div class="w-32 h-32 mx-auto mb-4">
+          <img src="{% static 'image/no-news.png' %}" alt="No product available" class="w-full h-full object-contain">
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
+        <p class="text-gray-500 mb-6">Ayo tambahkan produk pertamamu sekarang.</p>
+        <a href="{% url 'main:add_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            Add Product
+        </a>
+      </div>
+    {% else %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for product in products %}
+          <div class="opacity-0 translate-y-6 animate-fadeInUp animation-delay-{{ forloop.counter0|add:1 }}00">
+            {% include 'card_produk.html' with product=product %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+/* Animasi fade-in + slide-up */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 1.0s ease-out forwards;
+}
+.animation-delay-100 { animation-delay: 0.1s; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-300 { animation-delay: 0.3s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-500 { animation-delay: 0.5s; }
+</style>
+{% endblock content %}
