@@ -90,8 +90,8 @@ Properti penting pada item:
 Kegunaan Grid:
  -Membuat layout kompleks seperti halaman utama website dengan header, sidebar, konten utama, dan footer.
  -Membuat galeri gambar dengan kolom dinamis.
+ -Membuat dashboard admin dengan banyak card.
 
-Membuat dashboard admin dengan banyak card.
 5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!
 Pertama saya membuat tailwind, tailwind berguna untuk utility css frame work dan juga berguna una untuk membuat desain yang unik sesuai keinginan kita. Tailwind ini saya menggantinya di base.html. Setelah itu saya melakukan penambahan fitur edit produk di views.py dan juga menambahkan edit_produk.html agar nanti fitur editnya juga kelihatan di tampilannya. Jangan lupa ditambahkan di urls.py. Selain itu jangan lupa ditambahkan di main.html agar tombol edit nanti bisa kelihatan dan nanti juga dibawa ke fitur edit produk. Saya juga ada menambahkan satu fitur lagi yaitu delete produk yang berfungsi sebagai untuk melakukan delete produk, jadi saya akan menambahkan fungsi delete di views.py dan juga saya menambahkan di urls.py sama di main.html saya juga di main.html saya menambahkan button dan menghubungkan ke delete_produk. 
 
