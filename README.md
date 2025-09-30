@@ -53,7 +53,19 @@ Flexbox lebih dipakai untuk menyusun elemen secara horizontal (row ) atau vertik
   justify-content: space-between; //atur jarak antar item 
   align-items: center;            // ratakan secara vertikal 
 }
-Hasilnya akan mendapat item sejajar rapi dalam satu baris, dengan jarak otomatis teratur. 
+Hasilnya akan mendapat item sejajar rapi dalam satu baris, dengan jarak otomatis teratur. Kegunaan Flexbox: navbar, tombol yang sejajar, form, daftar produk rapi dalam baris, atau membuat layout responsif sederhana.
+
+Properti penting pada container (display: flex;):
+ -flex-direction: menentukan arah tata letak (row, column, row-reverse, column-reverse).
+ -justify-content: mengatur posisi horizontal, misalnya flex-start, flex-end, center, space-between, space-around.
+ -align-items: mengatur posisi vertikal item dalam satu baris (flex-start, flex-end, center, stretch, baseline).
+ -flex-wrap: apakah elemen harus turun ke baris berikutnya kalau tidak muat (nowrap, wrap).
+
+Properti penting pada item (untuk flex):
+ -flex-grow: apakah item bisa meluas untuk mengisi ruang kosong.
+ -flex-shrink: apakah item bisa mengecil jika ruang terbatas.
+ -flex-basis: ukuran awal item sebelum grow/shrink bekerja.
+ -order: menentukan urutan elemen, meski HTML-nya beda urutan.
 
 Grid Layout biasanya dipakai untuk menyusun elemen dalam baris dan kolom. Biasanya cocok untuk layout dashboard, tabel atau galeri gambar. Contoh: 
 
@@ -64,6 +76,22 @@ Grid Layout biasanya dipakai untuk menyusun elemen dalam baris dan kolom. Biasan
 }
 Hasilnya akan mendapat konten ditaruh dalam grid 3 kolom otomatis seperti tabel fleksibel.
 
+Properti penting pada container (display: grid;):
+ -grid-template-columns & grid-template-rows: mendefinisikan jumlah dan ukuran kolom/baris.
+ -gap: jarak antar sel grid (bisa row-gap dan column-gap).
+ -justify-items dan align-items: mengatur posisi konten dalam setiap sel.
+ -grid-template-areas: memberi nama area grid, lalu item bisa diposisikan ke area tersebut.
+
+Properti penting pada item:
+ -grid-column: menentukan item menempati kolom ke berapa sampai berapa.
+ -grid-row: menentukan item menempati baris ke berapa sampai berapa.
+ -justify-self dan align-self: atur posisi spesifik untuk item tertentu.
+
+Kegunaan Grid:
+ -Membuat layout kompleks seperti halaman utama website dengan header, sidebar, konten utama, dan footer.
+ -Membuat galeri gambar dengan kolom dinamis.
+
+Membuat dashboard admin dengan banyak card.
 5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!
 Pertama saya membuat tailwind, tailwind berguna untuk utility css frame work dan juga berguna una untuk membuat desain yang unik sesuai keinginan kita. Tailwind ini saya menggantinya di base.html. Setelah itu saya melakukan penambahan fitur edit produk di views.py dan juga menambahkan edit_produk.html agar nanti fitur editnya juga kelihatan di tampilannya. Jangan lupa ditambahkan di urls.py. Selain itu jangan lupa ditambahkan di main.html agar tombol edit nanti bisa kelihatan dan nanti juga dibawa ke fitur edit produk. Saya juga ada menambahkan satu fitur lagi yaitu delete produk yang berfungsi sebagai untuk melakukan delete produk, jadi saya akan menambahkan fungsi delete di views.py dan juga saya menambahkan di urls.py sama di main.html saya juga di main.html saya menambahkan button dan menghubungkan ke delete_produk. 
 
