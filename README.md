@@ -1,12 +1,76 @@
 1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut! 
 
-Ketika sebuah elemen HTML dipengaruhi oleh banyak aturan CSS, maka browser akan menentukan 
+Ketika sebuah elemen HTML dipengaruhi oleh banyak aturan CSS, maka browser akan menentukan aturan mana yang akan dipakai. Konsep ini sering disebut dengan specificity. Dengan urutannya adalah
+- 1. Inline Style 
+  Inline Style sering dikenal dengan aturan CSS yang ditulis langsung pada elemen HTML, misalnya: <p style="color: red;">Teks ini merah</p>
+- 2. ID Selector 
+  ID selector biasa ditulis dengan # kayak #judul { color: blue; }. Kalau elemen punya ID ini, aturannya akan lebih kuat daripada class atau tag biasa. 
+- 3. Class, Attribute, dan Pseudo-class Selector
+  Biasanya contohnya berupa .card{}, input[type="text"] {} (attribute), dan a:hover {} (pseudo-class) . Biasanya ini ada di tengah
+- 4. Tag/ Element Selector
+  Tag/Element Selector biasanyaa ada di paling rendah. 
+- 5. Urutan deklarasi
+  Kalau sama sama kuat, browser akan memakai yang ditulis paling terakhir. Contoh: p{} dan div {}
 
 2. Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design, serta jelaskan mengapa! 
 
+Responsive design adalah pendekatan desain web yang memastikan tampilan website bisa menyesuaikan ukuran layar perangkat, baik desktop, tablet ataupun handphone. Konsep ini sangat penting karena sebagian besar pengguna internet mayoritas menggunakan smartphone. Kalau website tidak responsive maka akan harus zoom in/out sehingga user experience untuk pengguna akan menjadi buruk. 
+
+Contoh Web yang sudah responsive: 
+- tokopedia karena kalau dibuka di hp maka tombol lebih besar dan layout jadi satu kolom sehingga lebih mudah di scroll. 
+- Instagram Web karena feed otomatis menyesuaikan layar hp bukan dengan menampilkan layout dekstop.
+
+Contoh web yang belum responsive: 
+- Scele karena scele ketika dibuka di hp , teksnya akan menjadi sangat kecil sehingga pengguna harus geser atau melakukan zoom in agar dapat kebaca
+
+
 3.Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut! 
 
+- Margin lebih ke ruang kosong di luar elemen dan fungsinya untuk memberi jarak antar elemen. 
+- Border lebih ke garis tepi elemen, membungkus padding dan konten. Hal ini biasanya dikustomisasi melalui ketebalan, warna ataupun bentuk.
+- Padding lebih ke ruang kosong di dalam elemen, antara konten dan border.
+Visualisasinya bisa dalam seperti ini: 
+[ Margin ]
+   [ Border ]
+      [ Padding ]
+         [ Content ]
+
+Contoh kode: 
+.card {
+  margin: 20px;          // jarak luar antar elemen 
+  border: 2px solid red; // garis luar 
+  padding: 15px;         //jarak dalam antara teks dan border 
+}
+Dengan ini kita bisa melihat bahwa box model: konten ada di tengah serta dibungkus padding lalu disusul border dan disusul terakhir oleh margin diluar.
+
+
 4.Jelaskan konsep flex box dan grid layout beserta kegunaannya!
+
+Flexbox lebih dipakai untuk menyusun elemen secara horizontal (row ) atau vertikal (column). Biasanya cocok untuk navbar, daftar produk yang sejajar dan tombol yang mau diatur rapi. Contoh: 
+
+.container {
+  display: flex;
+  justify-content: space-between; //atur jarak antar item 
+  align-items: center;            // ratakan secara vertikal 
+}
+Hasilnya akan mendapat item sejajar rapi dalam satu baris, dengan jarak otomatis teratur. 
+
+Grid Layout biasanya dipakai untuk menyusun elemen dalam baris dan kolom. Biasanya cocok untuk layout dashboard, tabel atau galeri gambar. Contoh: 
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* bikin 3 kolom sama besar */
+  gap: 10px; /* jarak antar kotak */
+}
+Hasilnya akan mendapat konten ditaruh dalam grid 3 kolom otomatis seperti tabel fleksibel.
+
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!
+Pertama saya membuat tailwind, tailwind berguna untuk utility css frame work dan juga berguna una untuk membuat desain yang unik sesuai keinginan kita. Tailwind ini saya menggantinya di base.html. Setelah itu saya melakukan penambahan fitur edit produk di views.py dan juga menambahkan edit_produk.html agar nanti fitur editnya juga kelihatan di tampilannya. Jangan lupa ditambahkan di urls.py. Selain itu jangan lupa ditambahkan di main.html agar tombol edit nanti bisa kelihatan dan nanti juga dibawa ke fitur edit produk. Saya juga ada menambahkan satu fitur lagi yaitu delete produk yang berfungsi sebagai untuk melakukan delete produk, jadi saya akan menambahkan fungsi delete di views.py dan juga saya menambahkan di urls.py sama di main.html saya juga di main.html saya menambahkan button dan menghubungkan ke delete_produk. 
+
+Setelah itu semua saya kemudian membuat navigation bar untuk menavigasi berbagai fitur dalam sebuah web. jadi saya menambahkan add product, log out, login dan register. Jangan lupa untuk dibuat konfigurasi static files pada seeting,py nya agar Django dapat mengelola file statis secara otomatis tanpa perlu konfigurasi yang kompleks. Setelah itu semua saya akan berfokus pada styling dengan menambahkan folder baru static dan di dalamnya ditambahkan folder static serta ada juga global.css untuk berfokus pada warna di website serta stylingnya (kotaknya,textnya gitu).Jangan lupa base.htmlnya juga dihubungin ke global.css
+
+Saya juga ada memodifikasi di navbar.html agar lebih menarik dan juga saya bedain untuk tampilan di desktop dan mobile karena harus berbeda biar lebih gampang diakses untuk di mobile. Selain itu saya melakukan beberapa modifikasi di halaman login, register, halaman home, dan card produk . Card Produk saya melakukan beberapa perubahan dari tutorial dan juga di main.html saya juga melakukan perubahan agar lebih menarik dan berbeda dengan tutorial. Saya melakukan beberapa perubahan berupa tulisan font, ukuran tulisan dan letaknya. Di detail saya juga melakukan sedikit perubahan agar detail terlihat jauh lebih menarik dair yang sebelumnya . Jangan lupa juga untuk add product agar diganti dari sebelumnya agar pas melakukan add product lebih terlihat bagus dan gampang juga untuk diisi. Mungkin segitu perubahan saya untuk tugas 5 ini karena tugas 5 ini berfokus pada tampilan di mobile sama desktop agar user bisa mendapat experience yang bagus dan juga merasa gampang untuk mengakses
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 1. Apa itu Django AuthenticationForm? Jelaskan juga kelebihan dan kekurangannya.
