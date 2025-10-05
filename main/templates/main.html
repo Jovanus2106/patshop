@@ -7,10 +7,10 @@
 
 {% block content %}
 {% include 'navbar.html' %}
+{% include 'modal.html' %}
+
 <div class="bg-gray-50 w-full pt-20 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- Header Section -->
     <div class="mb-8 text-center">
       <h1 class="text-4xl font-bold text-gray-900 mb-2">
         Selamat Datang di <span class="text-green-600">PAT Shop</span>
@@ -18,33 +18,25 @@
       <p class="text-gray-600">Temukan produk terbaik sesuai kebutuhanmu 🚀</p>
     </div>
 
-<div class="flex justify-center mt-4">
-  <button 
-    onclick="showModal()" 
-    class="inline-flex items-center px-4 py-2 bg-white text-green-600 font-semibold 
-           outline outline-2 outline-green-600 outline-offset-[-2px] rounded-md 
-           hover:bg-green-600 hover:text-white transition-colors mb-4">
-    Add Product by AJAX
-  </button>
-</div>
+    <div class="flex justify-center mt-4">
+      <button onclick="showModal()" class="inline-flex items-center px-4 py-2 bg-white text-green-600 font-semibold 
+             outline outline-2 outline-green-600 outline-offset-[-2px] rounded-md 
+             hover:bg-green-600 hover:text-white transition-colors mb-4">
+        Add Product by AJAX
+      </button>
+    </div>
 
-
-    <!-- Filter Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       <div class="flex space-x-3 mb-4 sm:mb-0">
-        <a id="filter-all" class="bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700">
-          All Product
-        </a>
-        <a id="filter-my" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
-          My Product
-        </a>
+        <a id="filter-all" class="bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700">All Product</a>
+        <a id="filter-my" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">My Product</a>
       </div>
       {% if user.is_authenticated %}
         <div class="text-sm text-gray-500">Last login: {{ last_login }}</div>
       {% endif %}
     </div>
 
-    <!-- Loading State -->
+    <!-- Loading / Error / Empty / Grid -->
     <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
       <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -52,37 +44,24 @@
       </svg>
       <p class="text-gray-600 mt-3">Loading products...</p>
     </div>
-
-    <!-- Error State -->
     <div id="error" class="hidden"></div>
-
-    <!-- Product Grid -->
     <div id="grid" class="hidden"></div>
-
-    <!-- Empty State -->
     <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
       <div class="w-32 h-32 mx-auto mb-4">
         <img src="{% static 'image/no-news.png' %}" alt="No product available" class="w-full h-full object-contain">
       </div>
       <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
       <p class="text-gray-500 mb-6">Ayo tambahkan produk pertamamu sekarang.</p>
-      <a href="{% url 'main:add_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-        Add Product
-      </a>
+      <button onclick="showModal()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">Add Product</button>
     </div>
   </div>
 </div>
 
 <script>
-// ==========================
-// 🔹 Konfigurasi
-// ==========================
 const API_ENDPOINT = "{% url 'main:show_json' %}";
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+const CSRF_TOKEN = '{{ csrf_token }}';
 
-// ==========================
-// 🔹 Elemen DOM
-// ==========================
 const loadingSpinner = document.getElementById('loading');
 const errorMessage = document.getElementById('error');
 const emptyState = document.getElementById('empty');
@@ -90,15 +69,10 @@ const gridContainer = document.getElementById('grid');
 const btnAll = document.getElementById('filter-all');
 const btnMy = document.getElementById('filter-my');
 
-// ==========================
-// 🔹 Variabel State
-// ==========================
 let activeFilter = 'all';
 let allProducts = [];
+let isFetching = false; // <== mencegah fetch dobel
 
-// ==========================
-// 🔹 Fungsi Tampilan
-// ==========================
 function updateFilterButtons() {
   if (activeFilter === 'all') {
     btnAll.className = 'bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700';
@@ -109,41 +83,38 @@ function updateFilterButtons() {
   }
 }
 
-function displaySections({ loading = false, error = false, empty = false, grid = false }) {
+function displaySections({ loading=false, error=false, empty=false, grid=false }) {
   loadingSpinner.classList.toggle('hidden', !loading);
   errorMessage.classList.toggle('hidden', !error);
   emptyState.classList.toggle('hidden', !empty);
   gridContainer.classList.toggle('hidden', !grid);
-  if (grid) gridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+  if(grid) gridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 }
 
-// ==========================
-// 🔹 Kartu Produk
-// ==========================
-function buildProductCard(product) {
+function buildProductCard(product){
   const article = document.createElement('article');
   article.className = 'bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col';
 
   const detailLink = `{% url 'main:detail_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
   const editLink = `{% url 'main:edit_produk' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
-  const deleteLink = `{% url 'main:delete_produk' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
 
-  const imageHTML = product.thumbnail
-    ? `<img src="${product.thumbnail}" alt="${product.name}" class="w-full h-48 object-cover">`
+  const imageHTML = product.thumbnail 
+    ? `<img src="${product.thumbnail}" alt="${product.name}" class="w-full h-48 object-cover">` 
     : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">No Image</div>`;
 
-  const featuredBadge = product.is_featured
-    ? `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">⭐ Featured</span>`
+  const featuredBadge = product.is_featured 
+    ? `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">⭐ Featured</span>` 
     : '';
 
   const ownerButtons = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(product.user_id)
-    ? `
-      <div class="flex space-x-4 text-sm mt-2">
-        <a href="${editLink}" class="text-gray-600 hover:text-gray-800">Edit</a>
-        <a href="${deleteLink}" class="text-red-600 hover:text-red-700" onclick='return confirm("Yakin ingin menghapus produk ini?")'>Delete</a>
-      </div>
-    `
-    : '';
+    ? `<div class="flex space-x-3 text-sm mt-2 justify-center">
+         <a href="${editLink}" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Edit</a>
+         <button class="delete-product px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition" data-id="${product.id}">Delete</button>
+         <a href="${detailLink}" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Detail</a>
+       </div>`
+    : `<div class="flex justify-center mt-2">
+         <a href="${detailLink}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">Detail</a>
+       </div>`;
 
   article.innerHTML = `
     <div class="relative">
@@ -156,74 +127,105 @@ function buildProductCard(product) {
     <div class="p-5 flex flex-col items-center text-center">
       <h3 class="text-lg font-semibold text-gray-900 mb-1">${product.name}</h3>
       <p class="text-green-600 font-semibold">Rp ${Number(product.price).toLocaleString('id-ID')}</p>
-      <p class="text-gray-500 text-sm">Stok: ${product.stok || '0'}</p>
+      <p class="text-gray-500 text-sm">Stok: ${product.stock ?? 0}</p>
       ${ownerButtons}
-      <div class="mt-3">
-        <a href="${detailLink}" class="text-green-600 hover:text-green-700 font-medium">Lihat Detail</a>
-      </div>
     </div>
   `;
-
   return article;
 }
 
-// ==========================
-// 🔹 Render Produk
-// ==========================
-function renderProducts(products) {
+function renderProducts(products){
   gridContainer.innerHTML = '';
   products.forEach(p => gridContainer.appendChild(buildProductCard(p)));
 }
 
-// ==========================
-// 🔹 Filter
-// ==========================
-function filterProducts() {
+function filterProducts(){
   updateFilterButtons();
-  const filtered = activeFilter === 'all'
-    ? allProducts
-    : allProducts.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
-
-  if (filtered.length === 0) displaySections({ empty: true });
-  else {
-    renderProducts(filtered);
-    displaySections({ grid: true });
-  }
+  const filtered = activeFilter === 'all' ? allProducts : allProducts.filter(p=> Number(p.user_id)===Number(CURRENT_USER_ID));
+  if(filtered.length===0) displaySections({empty:true});
+  else { renderProducts(filtered); displaySections({grid:true}); }
 }
 
-// ==========================
-// 🔹 Ambil Data
-// ==========================
-async function fetchProducts() {
-  try {
-    displaySections({ loading: true });
-    const response = await fetch(API_ENDPOINT, { headers: { 'Accept': 'application/json' } });
-    if (!response.ok) throw new Error('Gagal mengambil data produk');
-
-    const data = await response.json();
-    allProducts = data || [];
+async function fetchProducts(){
+  if(isFetching) return;
+  isFetching = true;
+  try{
+    displaySections({loading:true});
+    const res = await fetch(API_ENDPOINT, {headers:{'Accept':'application/json'}});
+    if(!res.ok) throw new Error('Gagal fetch data');
+    allProducts = await res.json();
     filterProducts();
-  } catch (err) {
+  } catch(err){
     console.error(err);
-    displaySections({ error: true });
+    displaySections({error:true});
     errorMessage.textContent = 'Terjadi kesalahan saat memuat produk.';
+  } finally {
+    isFetching = false;
   }
 }
 
-// ==========================
-// 🔹 Event
-// ==========================
-btnAll.addEventListener('click', () => { activeFilter = 'all'; filterProducts(); });
-btnMy.addEventListener('click', () => { activeFilter = 'my'; filterProducts(); });
+btnAll.addEventListener('click',()=>{activeFilter='all';filterProducts();});
+btnMy.addEventListener('click',()=>{activeFilter='my';filterProducts();});
 
-// refresh otomatis setelah produk ditambah via modal
-document.addEventListener('tokoAdded', function() {
-  fetchProducts(); 
+document.addEventListener('click', function(e){
+    if(e.target.classList.contains('delete-product')){
+        const id = e.target.dataset.id;
+        if(confirm("Yakin ingin menghapus produk ini?")){
+            fetch(`/produk/${id}/delete`,{
+                method:'POST',
+                headers:{
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res=>res.json())
+            .then(data=>{
+                if(data.success){
+                    showToast('Produk berhasil dihapus!', '', 'success');
+                    e.target.closest('article').remove();
+                }else showToast('Gagal menghapus produk', data.message || '', 'error');
+            })
+            .catch(()=>showToast('Error', 'Terjadi kesalahan saat menghapus', 'error'));
+        }
+    }
+});
+document.addEventListener('tokoAdded', function(){ fetchProducts(); });
+
+fetchProducts();
+function showModal() {
+  const modal = document.getElementById('crudModal');
+  const modalContent = document.getElementById('crudModalContent');
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    modalContent.classList.remove('opacity-0', 'scale-95');
+    modalContent.classList.add('opacity-100', 'scale-100');
+  }, 50);
+}
+
+function hideModal() {
+  const modal = document.getElementById('crudModal');
+  const modalContent = document.getElementById('crudModalContent');
+  modalContent.classList.remove('opacity-100', 'scale-100');
+  modalContent.classList.add('opacity-0', 'scale-95');
+  setTimeout(() => { modal.classList.add('hidden'); }, 150);
+}
+
+async function addProductsEntry() {
+  await fetch("{% url 'main:add_products_entry_ajax' %}", {
+    method: "POST",
+    body: new FormData(document.querySelector('#tokoForm')),
+  });
+
+  document.getElementById("tokoForm").reset();
+  hideModal();
+  showToast('Produk Berhasil ditambahkan!', '', 'success');
+  fetchProducts(); // langsung refresh grid
+}
+
+document.getElementById("tokoForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  addProductsEntry();
 });
 
-// ==========================
-// 🔹 Inisialisasi
-// ==========================
-fetchProducts();
 </script>
 {% endblock content %}

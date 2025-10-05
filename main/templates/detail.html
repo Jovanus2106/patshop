@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("product-stock").textContent = "Stok: " + product.stock;
     document.getElementById("product-created").textContent = new Date(product.created_at).toLocaleString();
     document.getElementById("product-description").textContent = product.description;
-    document.getElementById("product-author").textContent = "Pembuat: " + (product.user || "Anonymous");
+    document.getElementById("product-author").textContent = "Pembuat: " + (product.user_username || "Anonymous");
 
     // kategori & featured badge
     const badges = document.getElementById("product-badges");

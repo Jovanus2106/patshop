@@ -46,18 +46,23 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
+
 def edit_produk(request, id):
-    produk = get_object_or_404(Toko, pk=id)
-    form = TokoForm(request.POST or None, instance=produk)
-    if form.is_valid() and request.method == 'POST':
-        form.save()
-        messages.success(request,"Produk berhasil diubah")
-        return redirect('main:show_main')
+    product = get_object_or_404(Toko, id=id)
+    form = TokoForm(request.POST or None, instance=product)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request,"Produk berhasil diubah")
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({"success": True})
+            return redirect("main:show_main")
 
     context = {
-        'form': form
+        "form": form,
+        "product": product,  
     }
-
     return render(request, "edit_produk.html", context)
 
 @csrf_exempt
@@ -87,10 +92,15 @@ def add_products_entry_ajax(request):
     return HttpResponse(b"CREATED", status=201)
 
 def delete_produk(request, id):
-    produk = get_object_or_404(Toko, pk=id)
-    produk.delete()
-    messages.success(request, "Produk telah dihapus")
-    return HttpResponseRedirect(reverse('main:show_main'))
+    if request.method == "POST":
+        produk = get_object_or_404(Toko, pk=id)
+        if produk.user == request.user:
+            produk.delete()
+            messages.success(request,"produk berhasil dihapus")
+            return JsonResponse({"success": True, "message": "Produk berhasil dihapus"})
+        else:
+            return JsonResponse({"success": False, "message": "Tidak punya izin untuk menghapus produk"}, status=403)
+    return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
 
 def login_user(request):
     if request.method == 'POST':
@@ -106,7 +116,7 @@ def login_user(request):
             }
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse(response_data)
-            response = HttpResponseRedirect(reverse("main:show_main"))
+            response = HttpResponse("Okay")
             response.set_cookie('last_login', str(datetime.datetime.now()))
             return response
         else:
@@ -130,7 +140,7 @@ def register(request):
                     'message': 'Account created successfully!',
                     'redirect_url': reverse('main:login_user')
                 })
-            return redirect('main:login_user')
+            return JsonResponse ({'success': False,'message': 'Registration failed. Please check your input.'}, status=400)
         else:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -171,7 +181,7 @@ def show_json(request):
             'id': str(toko.id),
             'name': toko.name,
             'price': toko.price,
-            'description': toko.category,
+            'description': toko.description,
             'thumbnail': toko.thumbnail,
             'category': toko.category,
             'is_featured': toko.is_featured,
@@ -195,7 +205,7 @@ def show_json_by_id(request, Toko_id ):
             'id': str(toko.id),
             'name': toko.name,
             'price': toko.price,
-            'description': toko.category,
+            'description': toko.description,
             'thumbnail': toko.thumbnail,
             'category': toko.category,
             'is_featured': toko.is_featured,
