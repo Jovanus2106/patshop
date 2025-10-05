@@ -6,6 +6,7 @@ from main.views import login_user
 from main.views import logout_user
 from main.views import edit_produk
 from main.views import delete_produk
+from main.views import add_products_entry_ajax
 
 
 urlpatterns = [
@@ -21,5 +22,6 @@ urlpatterns = [
     path('logout/', logout_user, name='logout_user'),
     path('produk/<uuid:id>/edit', edit_produk, name='edit_produk'),
     path('produk/<uuid:id>/delete', delete_produk, name='delete_produk'),
+    path('add-products-ajax', add_products_entry_ajax, name='add_products_entry_ajax'),
 ]
 

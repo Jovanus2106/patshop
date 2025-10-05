@@ -1,6 +1,7 @@
 from django.db import models
 import  uuid
 from django.contrib.auth.models import User
+from django.utils.html import strip_tags
 
 class Toko(models.Model):
 
@@ -20,10 +21,17 @@ class Toko(models.Model):
     stock = models.IntegerField()
     is_featured = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    
+
+
 
     def __str__(self):
         return self.name
-    
+    def clean_title(self):
+        name = self.cleaned_data["name"]
+        return strip_tags(name)
+
+    def clean_content(self):
+        description = self.cleaned_data["description"]
+        return strip_tags(description)
     
 

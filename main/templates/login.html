@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block meta %}
-<title>Login -  PAT Shop</title>
+<title>Login - PAT Shop</title>
 {% endblock meta %}
 
 {% block content %}
@@ -13,32 +13,7 @@
         <p class="text-gray-600">Welcome back to PAT Shop</p>
       </div>
 
-      <!-- Form Errors Display -->
-      {% if form.non_field_errors %}
-        <div class="mb-6">
-          {% for error in form.non_field_errors %}
-            <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700">
-              {{ error }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      {% if form.errors %}
-        <div class="mb-6">
-          {% for field, errors in form.errors.items %}
-            {% if field != '__all__' %}
-              {% for error in errors %}
-                <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700 mb-2">
-                  <strong>{{ field|title }}:</strong> {{ error }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <form method="POST" action="" class="space-y-6">
+      <form id="loginForm" method="POST" class="space-y-6">
         {% csrf_token %}
         
         <div>
@@ -70,26 +45,7 @@
         </button>
       </form>
 
-      <!-- Messages Display -->
-      {% if messages %}
-        <div class="mt-6">
-          {% for message in messages %}
-            <div 
-              class="
-                px-4 py-3 rounded-md text-sm border
-                {% if message.tags == 'success' %}
-                  bg-green-50 border-green-200 text-green-700
-                {% elif message.tags == 'error' %}
-                  bg-red-50 border-red-200 text-red-700
-                {% else %}
-                  bg-gray-50 border-gray-200 text-gray-700
-                {% endif %}
-              ">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+      <div id="loginMessage" class="mt-6"></div>
 
       <div class="mt-6 text-center pt-6 border-t border-gray-200">
         <p class="text-gray-500 text-sm">
@@ -102,4 +58,39 @@
     </div>
   </div>
 </div>
+
+<script>
+document.querySelector("#loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+  const messageDiv = document.querySelector("#loginMessage");
+
+  messageDiv.innerHTML = "<p class='text-gray-600 text-center'>Processing...</p>";
+
+  const response = await fetch("{% url 'main:login_user' %}", {
+    method: "POST",
+    body: formData,
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  });
+
+  const data = await response.json();
+
+  if (response.ok && data.success) {
+    messageDiv.innerHTML = `
+      <div class="px-4 py-3 rounded-md text-sm border bg-green-50 border-green-200 text-green-700">
+        ${data.message}
+      </div>`;
+    setTimeout(() => window.location.href = data.redirect_url, 1000);
+  } else {
+    messageDiv.innerHTML = `
+      <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700">
+        ${data.message}
+      </div>`;
+  }
+});
+</script>
 {% endblock content %}

@@ -1,3 +1,27 @@
+1. Apa perbedaan antara synchronous request dan asynchronous request?
+
+Synchronous request adalah jenis request yang dimana browser akan menunggu server merespons sepenuhnya sebelum melakukan aksi lain. Contohnyaa ketika user melakuka submit pada form HTML biasa, maka seluruh halaman akan reload terlebih dahulu dan user tidak bisa melakukan interaksi lain sampai response dari server diterima. Sebaliknya ketika asynchronous request memungkinkan browser menjadi lebih responsif meskipun sambil menunggu response dari server. Jadi di asynchronous request nantinya user tetap bisa berinteraksi dengan halaman lain tanpa terganggu. 
+
+
+2. Bagaimana AJAX bekerja di Django (alur request–response)?
+
+AJAX bekerja dengan cara mengirim request ke server secara asynchronous menggunakan JavaScript, biasanya melalui fetch atau XMLHttpRequest. Ketika user melakukan aksi, misalnya menekan tombol submit pada form, JavaScript akan mengambil data form dan mengirimkannya ke server Django tanpa melakukan reload halaman. Server kemudian menerima request tersebut melalui view, memproses data (seperti validasi form, autentikasi, atau penyimpanan ke database), dan mengembalikan response dalam format JSON. JavaScript di sisi frontend akan menangkap response ini, dan berdasarkan hasilnya bisa menampilkan pesan sukses, error atau melakukan redirect. Cara ini membuat seluruh proses menjadi lebih cepat dan interaktif karena hanya data yang dipertukarkan. 
+
+3. Apa keuntungan menggunakan AJAX dibandingkan render biasa di Django?
+
+Penggunaan AJAX memiliki banyak keuntungan yaitu  Pertama, halaman tidak perlu reload sehingga data yang sudah diisi oleh user tidak hilang dan proses menjadi lebih cepat. Kedua, jika ada halaman yang diperbarui maka hanya bagian tertentu saja yang diperbarui, misalnya form atau tabel produk sehingga dapat meningkatkan efisiensi dan juga menghemat bandwith. 
+Ketiga, AJAX membuat pengalaman pengguna menjadi lebih interaktif dan responsif, misalnya saat melakukan penambahan produk, filter produk, atau mengedit produk tersebut. Keempat, AJAX memudahkan integrasi dengan teknologi frontend modern, seperti React, Vue, atau Tailwind, sehingga desain dan logika interaksi bisa lebih fleksibel.
+
+4. Bagaimana cara memastikan keamanan saat menggunakan AJAX untuk fitur Login dan Register di Django?
+
+Ada beberapa hal untuk memastikan keamanan pada fitur Login dan Register di Django. Pertama adalah penggunaan CSRF token yang wajib disertakan dalam setiap POST request agar Django dapat memverifikasi request tersebut valid dan juga berasal dari situs sendiri. Keduanya, validasi data juga harus dilakukan di sisi sever meskipun sudah divalidasi front end. Django nanti akan tetap meriksa username dan password valid melalui authenticationForm atau usercreation form. Ketiga, pastikan data terkirim melalui metode POST, bukan query string dan gunakan HTTPS agar data terutama password ,terenkripsi selama transmisi. Keempat, mengimplementasikan perlindungan terhadap bruteforce attack agar akun tidak mudah dibobol
+
+5. Bagaimana AJAX mempengaruhi pengalaman pengguna (User Experience) pada website?
+
+Penggunaan Ajax ini sangat membantu pengguna karena dengan menggunakan ajax, maka halaman akan tetap responsif dan interaktif sehingga user tidak perlu menunggu reload halaman setiap kali melakukan aksi (menambahkan produt, mengedit produk , atau mensubmit form). Selain itu pesan sukses atau error akan langsung muncul di halaman (menggunakan toast.html) dan juga tidak akan menganggu proses lainnya. Interaksi juga terasa lebih mulus , fitur seperti realtime, pencarian instan dan update produk juga menjadi lebih cepat dan nyaman. Sehingga dengan beberapa perubahan ini membuat website menjadi lebih modern dan efisien untuk user . 
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut! 
 
 Ketika sebuah elemen HTML dipengaruhi oleh banyak aturan CSS, maka browser akan menentukan aturan mana yang akan dipakai. Konsep ini sering disebut dengan specificity. Dengan urutannya adalah

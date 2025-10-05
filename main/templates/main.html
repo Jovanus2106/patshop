@@ -12,64 +12,218 @@
 
     <!-- Header Section -->
     <div class="mb-8 text-center">
-      <h1 class="text-4xl font-bold text-gray-900 mb-2">Selamat Datang di <span class="text-green-600">PAT Shop</span></h1>
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">
+        Selamat Datang di <span class="text-green-600">PAT Shop</span>
+      </h1>
       <p class="text-gray-600">Temukan produk terbaik sesuai kebutuhanmu 🚀</p>
     </div>
+
+<div class="flex justify-center mt-4">
+  <button 
+    onclick="showModal()" 
+    class="inline-flex items-center px-4 py-2 bg-white text-green-600 font-semibold 
+           outline outline-2 outline-green-600 outline-offset-[-2px] rounded-md 
+           hover:bg-green-600 hover:text-white transition-colors mb-4">
+    Add Product by AJAX
+  </button>
+</div>
+
 
     <!-- Filter Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       <div class="flex space-x-3 mb-4 sm:mb-0">
-        <a href="?" class="{% if request.GET.filter == 'all' or not request.GET.filter  %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+        <a id="filter-all" class="bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700">
           All Product
         </a>
-        <a href="?filter=my" class="{% if request.GET.filter == 'my' %} bg-green-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
+        <a id="filter-my" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
           My Product
         </a>
       </div>
       {% if user.is_authenticated %}
-        <div class="text-sm text-gray-500">
-          Last login: {{ last_login }}
-        </div>
+        <div class="text-sm text-gray-500">Last login: {{ last_login }}</div>
       {% endif %}
     </div>
 
+    <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <p class="text-gray-600 mt-3">Loading products...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden"></div>
+
     <!-- Product Grid -->
-    {% if not products %}
-      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center shadow-sm">
-        <div class="w-32 h-32 mx-auto mb-4">
-          <img src="{% static 'image/no-news.png' %}" alt="No product available" class="w-full h-full object-contain">
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
-        <p class="text-gray-500 mb-6">Ayo tambahkan produk pertamamu sekarang.</p>
-        <a href="{% url 'main:add_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-            Add Product
-        </a>
+    <div id="grid" class="hidden"></div>
+
+    <!-- Empty State -->
+    <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <div class="w-32 h-32 mx-auto mb-4">
+        <img src="{% static 'image/no-news.png' %}" alt="No product available" class="w-full h-full object-contain">
       </div>
-    {% else %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for product in products %}
-          <div class="opacity-0 translate-y-6 animate-fadeInUp animation-delay-{{ forloop.counter0|add:1 }}00">
-            {% include 'card_produk.html' with product=product %}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
+      <p class="text-gray-500 mb-6">Ayo tambahkan produk pertamamu sekarang.</p>
+      <a href="{% url 'main:add_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+        Add Product
+      </a>
+    </div>
   </div>
 </div>
 
-<style>
-/* Animasi fade-in + slide-up */
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+<script>
+// ==========================
+// 🔹 Konfigurasi
+// ==========================
+const API_ENDPOINT = "{% url 'main:show_json' %}";
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+// ==========================
+// 🔹 Elemen DOM
+// ==========================
+const loadingSpinner = document.getElementById('loading');
+const errorMessage = document.getElementById('error');
+const emptyState = document.getElementById('empty');
+const gridContainer = document.getElementById('grid');
+const btnAll = document.getElementById('filter-all');
+const btnMy = document.getElementById('filter-my');
+
+// ==========================
+// 🔹 Variabel State
+// ==========================
+let activeFilter = 'all';
+let allProducts = [];
+
+// ==========================
+// 🔹 Fungsi Tampilan
+// ==========================
+function updateFilterButtons() {
+  if (activeFilter === 'all') {
+    btnAll.className = 'bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700';
+    btnMy.className = 'bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white';
+  } else {
+    btnMy.className = 'bg-green-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-700';
+    btnAll.className = 'bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white';
+  }
 }
-.animate-fadeInUp {
-  animation: fadeInUp 1.0s ease-out forwards;
+
+function displaySections({ loading = false, error = false, empty = false, grid = false }) {
+  loadingSpinner.classList.toggle('hidden', !loading);
+  errorMessage.classList.toggle('hidden', !error);
+  emptyState.classList.toggle('hidden', !empty);
+  gridContainer.classList.toggle('hidden', !grid);
+  if (grid) gridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 }
-.animation-delay-100 { animation-delay: 0.1s; }
-.animation-delay-200 { animation-delay: 0.2s; }
-.animation-delay-300 { animation-delay: 0.3s; }
-.animation-delay-400 { animation-delay: 0.4s; }
-.animation-delay-500 { animation-delay: 0.5s; }
-</style>
+
+// ==========================
+// 🔹 Kartu Produk
+// ==========================
+function buildProductCard(product) {
+  const article = document.createElement('article');
+  article.className = 'bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col';
+
+  const detailLink = `{% url 'main:detail_product' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
+  const editLink = `{% url 'main:edit_produk' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
+  const deleteLink = `{% url 'main:delete_produk' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', product.id);
+
+  const imageHTML = product.thumbnail
+    ? `<img src="${product.thumbnail}" alt="${product.name}" class="w-full h-48 object-cover">`
+    : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">No Image</div>`;
+
+  const featuredBadge = product.is_featured
+    ? `<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">⭐ Featured</span>`
+    : '';
+
+  const ownerButtons = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(product.user_id)
+    ? `
+      <div class="flex space-x-4 text-sm mt-2">
+        <a href="${editLink}" class="text-gray-600 hover:text-gray-800">Edit</a>
+        <a href="${deleteLink}" class="text-red-600 hover:text-red-700" onclick='return confirm("Yakin ingin menghapus produk ini?")'>Delete</a>
+      </div>
+    `
+    : '';
+
+  article.innerHTML = `
+    <div class="relative">
+      ${imageHTML}
+      <div class="absolute top-3 left-3">
+        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-600 text-white">${product.category || 'Uncategorized'}</span>
+      </div>
+      <div class="absolute top-3 right-3">${featuredBadge}</div>
+    </div>
+    <div class="p-5 flex flex-col items-center text-center">
+      <h3 class="text-lg font-semibold text-gray-900 mb-1">${product.name}</h3>
+      <p class="text-green-600 font-semibold">Rp ${Number(product.price).toLocaleString('id-ID')}</p>
+      <p class="text-gray-500 text-sm">Stok: ${product.stok || '0'}</p>
+      ${ownerButtons}
+      <div class="mt-3">
+        <a href="${detailLink}" class="text-green-600 hover:text-green-700 font-medium">Lihat Detail</a>
+      </div>
+    </div>
+  `;
+
+  return article;
+}
+
+// ==========================
+// 🔹 Render Produk
+// ==========================
+function renderProducts(products) {
+  gridContainer.innerHTML = '';
+  products.forEach(p => gridContainer.appendChild(buildProductCard(p)));
+}
+
+// ==========================
+// 🔹 Filter
+// ==========================
+function filterProducts() {
+  updateFilterButtons();
+  const filtered = activeFilter === 'all'
+    ? allProducts
+    : allProducts.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+  if (filtered.length === 0) displaySections({ empty: true });
+  else {
+    renderProducts(filtered);
+    displaySections({ grid: true });
+  }
+}
+
+// ==========================
+// 🔹 Ambil Data
+// ==========================
+async function fetchProducts() {
+  try {
+    displaySections({ loading: true });
+    const response = await fetch(API_ENDPOINT, { headers: { 'Accept': 'application/json' } });
+    if (!response.ok) throw new Error('Gagal mengambil data produk');
+
+    const data = await response.json();
+    allProducts = data || [];
+    filterProducts();
+  } catch (err) {
+    console.error(err);
+    displaySections({ error: true });
+    errorMessage.textContent = 'Terjadi kesalahan saat memuat produk.';
+  }
+}
+
+// ==========================
+// 🔹 Event
+// ==========================
+btnAll.addEventListener('click', () => { activeFilter = 'all'; filterProducts(); });
+btnMy.addEventListener('click', () => { activeFilter = 'my'; filterProducts(); });
+
+// refresh otomatis setelah produk ditambah via modal
+document.addEventListener('tokoAdded', function() {
+  fetchProducts(); 
+});
+
+// ==========================
+// 🔹 Inisialisasi
+// ==========================
+fetchProducts();
+</script>
 {% endblock content %}
