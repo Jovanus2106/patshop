@@ -22,7 +22,7 @@
       <button onclick="showModal()" class="inline-flex items-center px-4 py-2 bg-white text-green-600 font-semibold 
              outline outline-2 outline-green-600 outline-offset-[-2px] rounded-md 
              hover:bg-green-600 hover:text-white transition-colors mb-4">
-        Add Product by AJAX
+        Add Product
       </button>
     </div>
 
@@ -35,6 +35,10 @@
         <div class="text-sm text-gray-500">Last login: {{ last_login }}</div>
       {% endif %}
     </div>
+
+    <button id="refreshButton" class="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 transition-colors">
+    Refresh Products
+    </button>
 
     <!-- Loading / Error / Empty / Grid -->
     <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
@@ -190,6 +194,18 @@ document.addEventListener('click', function(e){
     }
 });
 document.addEventListener('tokoAdded', function(){ fetchProducts(); });
+
+  document.addEventListener('DOMContentLoaded', () => { 
+    const refreshButton = document.getElementById('refreshButton');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', () => {
+          showToast("Produk berhasil diperbarui", "", "success");
+          fetchProducts();
+      });
+    }
+  });
+
+
 
 fetchProducts();
 function showModal() {
